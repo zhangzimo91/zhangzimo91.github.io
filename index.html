@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="设备激活中心 - 验证码验证与管理系统">
+    <title>激活中心</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-yellow: #FFCC00;
+            --ios-gray: #8E8E93;
+            --ios-light-gray: #F2F2F7;
+            --ios-bg: #F5F5F7;
+            --ios-card: #FFFFFF;
+            --ios-text: #1C1C1E;
+            --ios-text-secondary: #6C757D;
+            --ios-border: #E5E5EA;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--ios-bg);
+            color: var(--ios-text);
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        .nav-header {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid rgba(0,0,0,0.16);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ios-text);
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 16px;
+            color: var(--ios-blue);
+            font-size: 17px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .nav-back:hover {
+            opacity: 0.6;
+        }
+
+        /* 主容器 - 优化手机比例 */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        @media (min-width: 480px) {
+            .container {
+                max-width: 430px;
+                padding: 20px;
+            }
+        }
+
+        /* 英雄区 */
+        .hero {
+            text-align: center;
+            padding: 32px 0 24px;
+        }
+
+        .hero-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            border-radius: 20px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.24);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .hero-title {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.021em;
+            margin-bottom: 8px;
+            color: var(--ios-text);
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            line-height: 1.4;
+            padding: 0 20px;
+        }
+
+        /* 公告卡片轮播 - 苹果风格 */
+        .announcement-section {
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ios-text);
+        }
+
+        .section-more {
+            font-size: 15px;
+            color: var(--ios-blue);
+            cursor: pointer;
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px;
+            margin: -4px;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .announcement-card {
+            flex: 0 0 85%;
+            max-width: 320px;
+            background: var(--ios-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            scroll-snap-align: start;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .announcement-card:active {
+            transform: scale(0.96);
+        }
+
+        .card-media {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-media img, .card-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-media-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--ios-blue);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .announcement-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ios-text);
+            margin-bottom: 6px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .announcement-desc {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-date {
+            font-size: 12px;
+            color: var(--ios-gray);
+            margin-top: 10px;
+        }
+
+        /* iOS 风格卡片 */
+        .ios-card {
+            background: var(--ios-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 16px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out 0.2s forwards;
+        }
+
+        .card-header {
+            padding: 20px 20px 0;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+        }
+
+        /* 表单组 */
+        .form-group {
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 480px) {
+            .form-group {
+                padding: 0 20px;
+            }
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .ios-input {
+            width: 100%;
+            height: 50px;
+            padding: 0 16px;
+            font-size: 17px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--radius-md);
+            background: var(--ios-light-gray);
+            color: var(--ios-text);
+            transition: all 0.2s;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+        }
+
+        .ios-input:focus {
+            outline: none;
+            background: var(--ios-card);
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
+        .ios-input::placeholder {
+            color: #C7C7CC;
+        }
+
+        /* 按钮 */
+        .btn-primary {
+            width: 100%;
+            height: 50px;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: #0051D5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            background: #004494;
+        }
+
+        .btn-primary:disabled {
+            background: #C7C7CC;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            height: 50px;
+            background: var(--ios-light-gray);
+            color: var(--ios-blue);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #E5E5EA;
+        }
+
+        /* 结果展示 */
+        .result-container {
+            margin: 16px;
+            padding: 24px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .result-success {
+            background: rgba(52, 199, 89, 0.08);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        .result-error {
+            background: rgba(255, 59, 48, 0.08);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+
+        .result-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+
+        .result-success .result-icon {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        .result-error .result-icon {
+            background: var(--ios-red);
+            color: white;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .result-success .result-title {
+            color: #1D6F38;
+        }
+
+        .result-error .result-title {
+            color: #C41E3A;
+        }
+
+        .result-code {
+            font-family: 'SF Mono', SFMono-Regular, ui-monospace, monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ios-text);
+            letter-spacing: 2px;
+            margin: 16px 0;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--ios-border);
+            word-break: break-all;
+        }
+
+        /* 人机验证层 */
+        .captcha-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .captcha-layer.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .captcha-container {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .captcha-layer.active .captcha-container {
+            transform: scale(1);
+        }
+
+        .captcha-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* 图片验证码 */
+        .image-captcha {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .captcha-image {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .captcha-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        /* 滑块验证 */
+        .slider-captcha {
+            margin-bottom: 20px;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 50px;
+            background: var(--ios-light-gray);
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slider-bg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #34C759 0%, #30B350 100%);
+            border-radius: 25px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .slider-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transition: transform 0.1s;
+            z-index: 10;
+        }
+
+        .slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        /* 列表样式 */
+        .ios-list {
+            background: var(--ios-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .list-item {
+            padding: 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .list-label {
+            font-size: 16px;
+            color: var(--ios-text);
+        }
+
+        .list-value {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .list-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-available {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--ios-green);
+        }
+
+        .badge-used {
+            background: rgba(142, 142, 147, 0.15);
+            color: var(--ios-gray);
+        }
+
+        /* 管理员面板 */
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--ios-card);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ios-blue);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--ios-text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* 日志系统 */
+        .log-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            padding: 12px 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .log-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .log-indicator.danger {
+            background: var(--ios-red);
+            box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+        }
+
+        .log-indicator.warning {
+            background: var(--ios-orange);
+            box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+        }
+
+        .log-indicator.safe {
+            background: var(--ios-green);
+            box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+        }
+
+        .log-content {
+            flex: 1;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .log-level {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .log-level.danger {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--ios-red);
+        }
+
+        .log-level.warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--ios-orange);
+        }
+
+        .log-level.safe {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--ios-green);
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: var(--ios-gray);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .log-details {
+            font-size: 13px;
+            color: var(--ios-text-secondary);
+            line-height: 1.4;
+        }
+
+        .log-ip, .log-device {
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+            color: var(--ios-gray);
+            margin-top: 4px;
+        }
+
+        /* 激活记录 */
+        .record-item {
+            padding: 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            background: var(--ios-card);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .record-id {
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            color: var(--ios-blue);
+            font-weight: 600;
+        }
+
+        .record-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .record-status.success {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--ios-green);
+        }
+
+        .record-status.failed {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--ios-red);
+        }
+
+        .record-details {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            line-height: 1.5;
+        }
+
+        .record-code {
+            font-family: 'SF Mono', monospace;
+            background: var(--ios-light-gray);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* 公告编辑 */
+        .editor-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: var(--ios-light-gray);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            overflow-x: auto;
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+
+        .editor-content {
+            min-height: 200px;
+            padding: 16px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--radius-md);
+            background: white;
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        .media-upload {
+            border: 2px dashed var(--ios-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .media-upload:hover {
+            border-color: var(--ios-blue);
+            background: rgba(0, 122, 255, 0.02);
+        }
+
+        /* 设置项 */
+        .settings-item {
+            padding: 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--ios-card);
+        }
+
+        .settings-label {
+            font-size: 16px;
+            color: var(--ios-text);
+        }
+
+        .settings-value {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-arrow {
+            color: var(--ios-gray);
+        }
+
+        /* 分段控制 */
+        .segment-control {
+            display: flex;
+            background: var(--ios-light-gray);
+            border-radius: var(--radius-sm);
+            padding: 2px;
+            margin-bottom: 16px;
+        }
+
+        .segment-item {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ios-text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .segment-item.active {
+            background: white;
+            color: var(--ios-text);
+            box-shadow: var(--shadow-sm);
+            font-weight: 600;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ios-text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 加载动画 */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 提示模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            width: 90%;
+            max-width: 340px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-text {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* 页面指示器 */
+        .page-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--ios-border);
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--ios-blue);
+            width: 20px;
+            border-radius: 3px;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 380px) {
+            .hero-title {
+                font-size: 24px;
+            }
+            
+            .announcement-title {
+                font-size: 16px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+        }
+
+        /* 安全提示 */
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .security-badge.high {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--ios-green);
+        }
+
+        .security-badge.medium {
+            background: rgba(255, 149, 0, 0.15);
+            color: var(--ios-orange);
+        }
+
+        .security-badge.low {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--ios-red);
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 代码输入框 */
+        .code-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            font-size: 15px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--radius-md);
+            background: var(--ios-light-gray);
+            font-family: 'SF Mono', monospace;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+
+        .code-textarea:focus {
+            outline: none;
+            border-color: var(--ios-blue);
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 人机验证层 -->
+    <div class="captcha-layer" id="captchaLayer">
+        <div class="captcha-container" id="captchaContainer">
+            <!-- 动态内容 -->
+        </div>
+    </div>
+
+    <!-- 提示模态框 -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="alertIcon">✓</div>
+            <div class="modal-title" id="alertTitle">提示</div>
+            <div class="modal-text" id="alertText">内容</div>
+            <button class="btn-primary" onclick="closeAlert()">确定</button>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="nav-header">
+        <a class="nav-back" id="backBtn" style="display: none;" onclick="showUserPanel()">
+            <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style="margin-top: 1px;">
+                <path d="M10.5 18L2.5 10L10.5 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            返回
+        </a>
+        <div class="nav-title" id="pageTitle">激活中心</div>
+    </nav>
+
+    <!-- 用户激活面板 -->
+    <div class="container" id="userPanel">
+        <!-- 公告区域 -->
+        <div class="announcement-section" id="announcementSection" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">最新公告</div>
+                <div class="section-more" onclick="scrollToAnnouncements()">查看全部</div>
+            </div>
+            <div class="cards-container" id="announcementCards">
+                <!-- 动态生成公告卡片 -->
+            </div>
+            <div class="page-indicator" id="pageIndicator">
+                <!-- 动态生成指示器 -->
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="hero-icon">🔐</div>
+            <h1 class="hero-title">设备激活</h1>
+            <p class="hero-subtitle">输入购买验证码生成专属激活码<br>每个验证码仅限使用一次</p>
+        </div>
+
+        <div class="ios-card">
+            <div class="card-header">
+                <div class="card-title">验证信息</div>
+                <div class="card-subtitle">请准确输入您的验证码和设备码</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">验证码</label>
+                <div class="input-wrapper">
+                    <input type="text" class="ios-input" id="verifyCode" placeholder="请输入购买的验证码" maxlength="20" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">设备码</label>
+                <div class="input-wrapper">
+                    <input type="text" class="ios-input" id="deviceCode" placeholder="输入数字设备码，如：1234" maxlength="10" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group" style="padding-bottom: 20px;">
+                <button class="btn-primary" id="verifyBtn" onclick="startVerification()">
+                    验证并生成激活码
+                </button>
+            </div>
+
+            <div id="resultContainer" class="result-container">
+                <!-- 动态结果 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员面板 -->
+    <div class="container admin-panel" id="adminPanel">
+        <div class="hero" style="padding-bottom: 20px;">
+            <div class="hero-icon" style="background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);">⚙️</div>
+            <h1 class="hero-title">管理中心</h1>
+            <p class="hero-subtitle">系统管理与监控</p>
+        </div>
+
+        <div class="segment-control">
+            <div class="segment-item active" onclick="switchTab('overview', this)">概览</div>
+            <div class="segment-item" onclick="switchTab('records', this)">记录</div>
+            <div class="segment-item" onclick="switchTab('logs', this)">日志</div>
+            <div class="segment-item" onclick="switchTab('announce', this)">公告</div>
+            <div class="segment-item" onclick="switchTab('settings', this)">设置</div>
+        </div>
+
+        <!-- 概览页 -->
+        <div id="tab-overview" class="tab-content">
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">总库存</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statUsed">0</div>
+                    <div class="stat-label">已使用</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statAvailable">0</div>
+                    <div class="stat-label">可用</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statRate">0%</div>
+                    <div class="stat-label">使用率</div>
+                </div>
+            </div>
+
+            <div class="ios-list" style="margin-bottom: 16px;">
+                <div class="list-item">
+                    <span class="list-label">今日激活</span>
+                    <span class="list-value" id="todayCount">0次</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">异常行为</span>
+                    <span class="list-value" id="suspiciousCount" style="color: var(--ios-red);">0次</span>
+                </div>
+            </div>
+
+            <div class="ios-card">
+                <div class="card-header">
+                    <div class="card-title">快速添加验证码</div>
+                </div>
+                <div class="form-group">
+                    <textarea class="code-textarea" id="quickAddCodes" placeholder="每行输入一个验证码..." style="min-height: 100px; margin-bottom: 12px;"></textarea>
+                    <button class="btn-primary" onclick="quickAddCodes()">批量添加</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 激活记录页 -->
+        <div id="tab-records" class="tab-content" style="display: none;">
+            <div class="ios-card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="card-title">激活记录</div>
+                        <div class="card-subtitle">最近100条操作记录</div>
+                    </div>
+                    <button class="btn-secondary" style="width: auto; padding: 8px 16px; height: 36px; font-size: 14px; margin: 0;" onclick="refreshRecords()">刷新</button>
+                </div>
+                <div class="codes-list" id="recordsList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志页 -->
+        <div id="tab-logs" class="tab-content" style="display: none;">
+            <div class="ios-card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="card-title">安全日志</div>
+                        <div class="card-subtitle">用户行为监控与风险分析</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="security-badge high">正常</span>
+                        <span class="security-badge medium">可疑</span>
+                        <span class="security-badge low">异常</span>
+                    </div>
+                </div>
+                <div class="log-container" id="logsList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 公告管理页 -->
+        <div id="tab-announce" class="tab-content" style="display: none;">
+            <div class="ios-card" style="margin-bottom: 16px;">
+                <div class="card-header">
+                    <div class="card-title">发布公告</div>
+                    <div class="card-subtitle">图文视频混合编辑</div>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="ios-input" id="announceTitle" placeholder="公告标题" style="margin-bottom: 12px;">
+                    
+                    <div class="editor-toolbar">
+                        <button class="toolbar-btn" onclick="insertText('<b>', '</b>')">粗体</button>
+                        <button class="toolbar-btn" onclick="insertText('<i>', '</i>')">斜体</button>
+                        <button class="toolbar-btn" onclick="insertText('<br>', '')">换行</button>
+                        <button class="toolbar-btn" onclick="insertLink()">链接</button>
+                    </div>
+                    
+                    <div class="editor-content" id="announceContent" contenteditable="true" placeholder="请输入公告内容..."></div>
+                    
+                    <div class="media-upload" onclick="document.getElementById('mediaFile').click()">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📎</div>
+                        <div style="font-size: 15px; color: var(--ios-text-secondary);">点击上传图片或视频</div>
+                        <div style="font-size: 12px; color: var(--ios-gray); margin-top: 4px;">支持 JPG、PNG、MP4 格式</div>
+                    </div>
+                    <input type="file" id="mediaFile" style="display: none;" accept="image/*,video/*" onchange="handleMediaUpload(this)">
+                    <div id="mediaPreview" style="margin-top: 12px; display: none;"></div>
+                    
+                    <button class="btn-primary" onclick="publishAnnouncement()" style="margin-top: 16px;">发布公告</button>
+                </div>
+            </div>
+
+            <div class="ios-card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="card-title">已发布公告</div>
+                        <div class="card-subtitle">管理现有公告内容</div>
+                    </div>
+                </div>
+                <div class="codes-list" id="announcementList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置页 -->
+        <div id="tab-settings" class="tab-content" style="display: none;">
+            <div class="ios-list" style="margin-bottom: 16px;">
+                <div class="settings-item" onclick="showChangePassword()">
+                    <span class="settings-label">修改管理员密码</span>
+                    <div class="settings-value">
+                        <span>******</span>
+                        <span class="settings-arrow">›</span>
+                    </div>
+                </div>
+                <div class="settings-item" onclick="showChangeUsername()">
+                    <span class="settings-label">修改管理员账户</span>
+                    <div class="settings-value">
+                        <span id="currentUsername">admin</span>
+                        <span class="settings-arrow">›</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ios-list">
+                <div class="list-item">
+                    <span class="list-label">系统版本</span>
+                    <span class="list-value">v2.0.0</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">安全等级</span>
+                    <span class="list-badge badge-available">高</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">最后更新</span>
+                    <span class="list-value" id="systemUpdateTime">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 系统配置
+        let ADMIN_USERNAME = 'admin';
+        let ADMIN_PASSWORD = 'admin123';
+        
+        // 数据存储
+        let verificationCodes = {};
+        let activationRecords = [];
+        let securityLogs = [];
+        let announcements = [];
+        
+        // 当前验证码（人机验证用）
+        let currentCaptcha = '';
+        let captchaVerified = false;
+        let sliderVerified = false;
+        
+        // 用户行为监控
+        let userBehavior = {
+            attempts: 0,
+            lastAttempt: null,
+            ip: '未知',
+            device: '未知',
+            location: '未知'
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initData();
+            loadAnnouncements();
+            getUserInfo();
+            document.getElementById('systemUpdateTime').textContent = new Date().toLocaleString('zh-CN');
+        });
+
+        // 初始化数据
+        function initData() {
+            // 添加示例验证码
+            const sampleCodes = ['ASDFGHJKL', 'QWERTYUIOP', 'ZXCVBNMLKJ', 'POIUYTREWQ', 'LKJHGFDSAA'];
+            sampleCodes.forEach(code => {
+                verificationCodes[code] = { used: false, usedBy: null, usedAt: null };
+            });
+        }
+
+        // 获取用户信息
+        function getUserInfo() {
+            // 模拟获取IP和设备信息
+            userBehavior.ip = generateRandomIP();
+            userBehavior.device = navigator.userAgent.match(/\((.*?)\)/)?.[1] || '未知设备';
+            userBehavior.location = '未知位置';
+        }
+
+        function generateRandomIP() {
+            return `${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
+        }
+
+        // 开始验证流程（含人机验证）
+        function startVerification() {
+            const verifyCode = document.getElementById('verifyCode').value.trim();
+            const deviceCode = document.getElementById('deviceCode').value.trim();
+
+            if (!verifyCode || !deviceCode) {
+                showResult('error', '请填写完整信息', '验证码和设备码不能为空');
+                return;
+            }
+
+            // 检查是否为管理员登录
+            if (verifyCode === ADMIN_USERNAME && deviceCode === ADMIN_PASSWORD) {
+                showImageCaptcha(true);
+                return;
+            }
+
+            // 普通用户验证
+            if (!/^\d+$/.test(deviceCode)) {
+                showResult('error', '设备码格式错误', '设备码必须为纯数字');
+                logBehavior('异常', '设备码格式错误', 'danger');
+                return;
+            }
+
+            // 显示人机验证
+            showImageCaptcha(false);
+        }
+
+        // 显示图片验证码（第一层）
+        function showImageCaptcha(isAdmin) {
+            captchaVerified = false;
+            sliderVerified = false;
+            
+            // 生成随机验证码
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            currentCaptcha = '';
+            for (let i = 0; i < 5; i++) {
+                currentCaptcha += chars[Math.floor(Math.random() * chars.length)];
+            }
+
+            const layer = document.getElementById('captchaLayer');
+            const container = document.getElementById('captchaContainer');
+            
+            container.innerHTML = `
+                <div class="captcha-title">安全验证 (1/2)</div>
+                <div class="image-captcha">
+                    <div class="captcha-image">${currentCaptcha}</div>
+                    <input type="text" class="ios-input" id="captchaInput" placeholder="请输入上图中的字符" maxlength="5" style="text-align: center; text-transform: uppercase;">
+                </div>
+                <button class="btn-primary" onclick="verifyImageCaptcha(${isAdmin})">下一步</button>
+            `;
+            
+            layer.classList.add('active');
+            
+            setTimeout(() => {
+                document.getElementById('captchaInput').focus();
+            }, 100);
+        }
+
+        // 验证图片验证码
+        function verifyImageCaptcha(isAdmin) {
+            const input = document.getElementById('captchaInput').value.trim().toUpperCase();
+            
+            if (input !== currentCaptcha) {
+                showAlert('error', '验证失败', '输入的字符不正确，请重试');
+                // 刷新验证码
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                currentCaptcha = '';
+                for (let i = 0; i < 5; i++) {
+                    currentCaptcha += chars[Math.floor(Math.random() * chars.length)];
+                }
+                document.querySelector('.captcha-image').textContent = currentCaptcha;
+                document.getElementById('captchaInput').value = '';
+                logBehavior('可疑', '图片验证码错误', 'warning');
+                return;
+            }
+            
+            captchaVerified = true;
+            showSliderCaptcha(isAdmin);
+        }
+
+        // 显示滑块验证码（第二层）
+        function showSliderCaptcha(isAdmin) {
+            const container = document.getElementById('captchaContainer');
+            
+            container.innerHTML = `
+                <div class="captcha-title">安全验证 (2/2)</div>
+                <div class="slider-captcha">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-bg" id="sliderBg"></div>
+                        <div class="slider-text" id="sliderText">拖动滑块完成验证</div>
+                        <div class="slider-thumb" id="sliderThumb">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M7 5L12 10L7 15" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; color: var(--ios-text-secondary); font-size: 13px; margin-top: 12px;">
+                    请按住滑块，拖动到最右侧
+                </div>
+            `;
+            
+            initSlider(isAdmin);
+        }
+
+        // 初始化滑块
+        function initSlider(isAdmin) {
+            const thumb = document.getElementById('sliderThumb');
+            const track = document.getElementById('sliderTrack');
+            const bg = document.getElementById('sliderBg');
+            const text = document.getElementById('sliderText');
+            
+            let isDragging = false;
+            let startX = 0;
+            let currentX = 0;
+            const maxX = track.offsetWidth - thumb.offsetWidth;
+            
+            thumb.addEventListener('touchstart', handleStart, {passive: false});
+            thumb.addEventListener('mousedown', handleStart);
+            
+            function handleStart(e) {
+                isDragging = true;
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                currentX = 0;
+                
+                document.addEventListener('touchmove', handleMove, {passive: false});
+                document.addEventListener('mousemove', handleMove);
+                document.addEventListener('touchend', handleEnd);
+                document.addEventListener('mouseup', handleEnd);
+            }
+            
+            function handleMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                currentX = Math.max(0, Math.min(x - startX, maxX));
+                
+                thumb.style.left = currentX + 'px';
+                bg.style.width = (currentX + thumb.offsetWidth/2) + 'px';
+                text.style.opacity = 1 - (currentX / maxX);
+            }
+            
+            function handleEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                document.removeEventListener('touchmove', handleMove);
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('touchend', handleEnd);
+                document.removeEventListener('mouseup', handleEnd);
+                
+                if (currentX >= maxX * 0.95) {
+                    // 验证成功
+                    thumb.style.left = maxX + 'px';
+                    bg.style.width = '100%';
+                    sliderVerified = true;
+                    
+                    setTimeout(() => {
+                        document.getElementById('captchaLayer').classList.remove('active');
+                        if (isAdmin) {
+                            showAdminPanel();
+                            document.getElementById('verifyCode').value = '';
+                            document.getElementById('deviceCode').value = '';
+                        } else {
+                            processActivation();
+                        }
+                    }, 300);
+                } else {
+                    // 复位
+                    thumb.style.transition = 'left 0.3s';
+                    bg.style.transition = 'width 0.3s';
+                    thumb.style.left = '0px';
+                    bg.style.width = '0px';
+                    text.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        thumb.style.transition = '';
+                        bg.style.transition = '';
+                    }, 300);
+                    
+                    logBehavior('可疑', '滑块验证失败', 'warning');
+                }
+            }
+        }
+
+        // 处理激活
+        function processActivation() {
+            const verifyCode = document.getElementById('verifyCode').value.trim();
+            const deviceCode = document.getElementById('deviceCode').value.trim();
+            const btn = document.getElementById('verifyBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>验证中...';
+            
+            setTimeout(() => {
+                if (!verificationCodes.hasOwnProperty(verifyCode)) {
+                    showResult('error', '验证码无效', '该验证码不存在，请检查是否输入正确或联系客服');
+                    resetBtn();
+                    addRecord(verifyCode, deviceCode, false, '验证码不存在');
+                    logBehavior('异常', '无效验证码尝试', 'danger');
+                    return;
+                }
+
+                if (verificationCodes[verifyCode].used) {
+                    showResult('error', '验证码已使用', `该验证码已于 ${verificationCodes[verifyCode].usedAt} 被使用`);
+                    resetBtn();
+                    addRecord(verifyCode, deviceCode, false, '验证码已使用');
+                    logBehavior('异常', '重复使用验证码', 'danger');
+                    return;
+                }
+
+                // 计算激活码
+                const deviceNum = parseInt(deviceCode);
+                const activationCode = deviceNum * 2 + 5;
+                
+                // 生成记录ID：年月日时分秒+当日激活次数
+                const now = new Date();
+                const dateStr = now.getFullYear().toString() + 
+                               String(now.getMonth() + 1).padStart(2, '0') + 
+                               String(now.getDate()).padStart(2, '0') + 
+                               String(now.getHours()).padStart(2, '0') + 
+                               String(now.getMinutes()).padStart(2, '0') + 
+                               String(now.getSeconds()).padStart(2, '0');
+                
+                // 获取当日激活次数
+                const today = now.toDateString();
+                const todayCount = activationRecords.filter(r => 
+                    new Date(r.time).toDateString() === today && r.success
+                ).length + 1;
+                
+                const recordId = dateStr + String(todayCount).padStart(3, '0');
+
+                // 标记为已使用
+                verificationCodes[verifyCode].used = true;
+                verificationCodes[verifyCode].usedBy = deviceCode;
+                verificationCodes[verifyCode].usedAt = now.toLocaleString('zh-CN');
+                
+                // 添加记录
+                addRecord(verifyCode, deviceCode, true, '激活成功', recordId, activationCode);
+                
+                showResult('success', '激活成功', activationCode);
+                resetBtn();
+                logBehavior('正常', '激活成功', 'safe');
+            }, 600);
+        }
+
+        // 添加激活记录
+        function addRecord(code, device, success, message, recordId = null, activationCode = null) {
+            const record = {
+                id: recordId || 'N/A',
+                code: code,
+                device: device,
+                success: success,
+                message: message,
+                time: new Date().toISOString(),
+                activationCode: activationCode
+            };
+            
+            activationRecords.unshift(record);
+            if (activationRecords.length > 100) {
+                activationRecords = activationRecords.slice(0, 100);
+            }
+        }
+
+        // 记录行为日志
+        function logBehavior(level, action, type) {
+            const log = {
+                level: level,
+                action: action,
+                type: type,
+                time: new Date().toISOString(),
+                ip: userBehavior.ip,
+                device: userBehavior.device,
+                location: userBehavior.location
+            };
+            
+            securityLogs.unshift(log);
+            if (securityLogs.length > 200) {
+                securityLogs = securityLogs.slice(0, 200);
+            }
+            
+            updateTodayStats();
+        }
+
+        // 更新今日统计
+        function updateTodayStats() {
+            const today = new Date().toDateString();
+            const todayRecords = activationRecords.filter(r => 
+                new Date(r.time).toDateString() === today
+            );
+            const suspicious = securityLogs.filter(l => 
+                new Date(l.time).toDateString() === today && l.type !== 'safe'
+            );
+            
+            const todayCountEl = document.getElementById('todayCount');
+            const suspiciousEl = document.getElementById('suspiciousCount');
+            
+            if (todayCountEl) todayCountEl.textContent = todayRecords.length + '次';
+            if (suspiciousEl) suspiciousEl.textContent = suspicious.length + '次';
+        }
+
+        // 显示结果
+        function showResult(type, title, content) {
+            const container = document.getElementById('resultContainer');
+            
+            if (type === 'success') {
+                container.className = 'result-container result-success';
+                container.innerHTML = `
+                    <div class="result-icon">✓</div>
+                    <div class="result-title">${title}</div>
+                    <div style="color: var(--ios-text-secondary); font-size: 15px; margin-bottom: 8px;">您的专属激活码</div>
+                    <div class="result-code">${content}</div>
+                    <div style="margin-top: 16px; font-size: 13px; color: var(--ios-green); font-weight: 500;">
+                        ✓ 该验证码已成功使用并失效
+                    </div>
+                `;
+            } else {
+                container.className = 'result-container result-error';
+                container.innerHTML = `
+                    <div class="result-icon">✕</div>
+                    <div class="result-title">${title}</div>
+                    <div style="color: var(--ios-text-secondary); font-size: 15px; margin-top: 8px;">${content}</div>
+                `;
+            }
+            
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = false;
+            btn.innerHTML = '验证并生成激活码';
+        }
+
+        // 管理员面板
+        function showAdminPanel() {
+            document.getElementById('userPanel').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('backBtn').style.display = 'flex';
+            document.getElementById('pageTitle').textContent = '管理中心';
+            
+            updateStats();
+            updateTodayStats();
+        }
+
+        function showUserPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('userPanel').style.display = 'block';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('pageTitle').textContent = '激活中心';
+            
+            document.getElementById('resultContainer').style.display = 'none';
+            switchTab('overview', document.querySelectorAll('.segment-item')[0]);
+        }
+
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.segment-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            
+            if (tabName === 'overview') {
+                updateStats();
+                updateTodayStats();
+            }
+            if (tabName === 'records') refreshRecords();
+            if (tabName === 'logs') refreshLogs();
+            if (tabName === 'announce') refreshAnnouncementList();
+        }
+
+        function updateStats() {
+            const total = Object.keys(verificationCodes).length;
+            const used = Object.values(verificationCodes).filter(v => v.used).length;
+            const available = total - used;
+            const rate = total > 0 ? Math.round((used / total) * 100) : 0;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statUsed').textContent = used;
+            document.getElementById('statAvailable').textContent = available;
+            document.getElementById('statRate').textContent = rate + '%';
+        }
+
+        // 刷新记录列表
+        function refreshRecords() {
+            const list = document.getElementById('recordsList');
+            
+            if (activationRecords.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div>暂无激活记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = activationRecords.map(record => `
+                <div class="record-item">
+                    <div class="record-header">
+                        <span class="record-id">#${record.id}</span>
+                        <span class="record-status ${record.success ? 'success' : 'failed'}">
+                            ${record.success ? '成功' : '失败'}
+                        </span>
+                    </div>
+                    <div class="record-details">
+                        验证码：<span class="record-code">${record.code}</span>　
+                        设备码：<span class="record-code">${record.device}</span>
+                        ${record.activationCode ? `<br>激活码：<span class="record-code">${record.activationCode}</span>` : ''}
+                        <br>时间：${new Date(record.time).toLocaleString('zh-CN')}
+                        ${!record.success ? `<br>原因：${record.message}` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 刷新日志列表
+        function refreshLogs() {
+            const list = document.getElementById('logsList');
+            
+            if (securityLogs.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <div>暂无安全日志</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = securityLogs.map(log => `
+                <div class="log-item">
+                    <div class="log-indicator ${log.type}"></div>
+                    <div class="log-content">
+                        <div class="log-header">
+                            <span class="log-level ${log.type}">${log.level}</span>
+                            <span class="log-time">${new Date(log.time).toLocaleString('zh-CN')}</span>
+                        </div>
+                        <div class="log-details">${log.action}</div>
+                        <div class="log-ip">IP: ${log.ip}</div>
+                        <div class="log-device">设备: ${log.device}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 快速添加验证码
+        function quickAddCodes() {
+            const textarea = document.getElementById('quickAddCodes');
+            const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            if (lines.length === 0) {
+                showAlert('error', '输入为空', '请输入至少一个验证码');
+                return;
+            }
+            
+            let added = 0;
+            let skipped = 0;
+            
+            lines.forEach(code => {
+                if (code.length < 6 || code.length > 20) return;
+                if (verificationCodes.hasOwnProperty(code)) {
+                    skipped++;
+                    return;
+                }
+                verificationCodes[code] = { used: false, usedBy: null, usedAt: null };
+                added++;
+            });
+            
+            textarea.value = '';
+            updateStats();
+            
+            const msg = [];
+            if (added > 0) msg.push(`成功添加 ${added} 个`);
+            if (skipped > 0) msg.push(`跳过重复 ${skipped} 个`);
+            
+            showAlert('success', '添加完成', msg.join('，') || '无有效验证码');
+        }
+
+        // 公告管理
+        function insertText(before, after) {
+            const editor = document.getElementById('announceContent');
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
+            
+            const newText = before + selectedText + after;
+            range.deleteContents();
+            range.insertNode(document.createTextNode(newText));
+        }
+
+        function insertLink() {
+            const url = prompt('请输入链接地址：');
+            if (url) {
+                insertText(`<a href="${url}" style="color: #007AFF;">`, '</a>');
+            }
+        }
+
+        function handleMediaUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const preview = document.getElementById('mediaPreview');
+            const url = URL.createObjectURL(file);
+            
+            if (file.type.startsWith('video/')) {
+                preview.innerHTML = `<video src="${url}" controls style="max-width: 100%; border-radius: 8px;"></video>`;
+            } else {
+                preview.innerHTML = `<img src="${url}" style="max-width: 100%; border-radius: 8px;">`;
+            }
+            
+            preview.style.display = 'block';
+            preview.dataset.url = url;
+            preview.dataset.type = file.type.startsWith('video/') ? 'video' : 'image';
+        }
+
+        function publishAnnouncement() {
+            const title = document.getElementById('announceTitle').value.trim();
+            const content = document.getElementById('announceContent').innerHTML;
+            const preview = document.getElementById('mediaPreview');
+            
+            if (!title) {
+                showAlert('error', '标题为空', '请输入公告标题');
+                return;
+            }
+            
+            const announcement = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                media: preview.style.display !== 'none' ? {
+                    url: preview.dataset.url,
+                    type: preview.dataset.type
+                } : null,
+                time: new Date().toISOString()
+            };
+            
+            announcements.unshift(announcement);
+            
+            // 清空表单
+            document.getElementById('announceTitle').value = '';
+            document.getElementById('announceContent').innerHTML = '';
+            preview.style.display = 'none';
+            preview.innerHTML = '';
+            
+            showAlert('success', '发布成功', '公告已发布到用户首页');
+            refreshAnnouncementList();
+            loadAnnouncements();
+        }
+
+        function refreshAnnouncementList() {
+            const list = document.getElementById('announcementList');
+            
+            if (announcements.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📢</div>
+                        <div>暂无公告</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = announcements.map((ann, index) => `
+                
