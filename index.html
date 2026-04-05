@@ -146,9 +146,9 @@
             padding: 0 20px;
         }
 
-        /* 公告卡片轮播 */
+        /* 公告卡片区域 */
         .announcement-section {
-            margin-bottom: 20px;
+            margin-top: 16px;
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInUp 0.6s ease-out forwards;
@@ -170,50 +170,41 @@
         }
 
         .section-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--ios-text);
         }
 
         .section-more {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--ios-blue);
             cursor: pointer;
         }
 
-        .cards-container {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
+        /* 四宫格布局 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             padding: 4px;
-            margin: -4px;
-        }
-
-        .cards-container::-webkit-scrollbar {
-            display: none;
         }
 
         .announcement-card {
-            flex: 0 0 85%;
-            max-width: 320px;
+            width: 100%;
             background: var(--ios-card);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             overflow: hidden;
-            box-shadow: var(--shadow-md);
-            scroll-snap-align: start;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .announcement-card:active {
-            transform: scale(0.96);
+            transform: scale(0.98);
         }
 
         .card-media {
             width: 100%;
-            height: 160px;
+            height: 80px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
             overflow: hidden;
@@ -231,30 +222,30 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+            font-size: 28px;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
 
         .card-content {
-            padding: 16px;
+            padding: 10px;
         }
 
         .card-badge {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 2px 6px;
             background: rgba(0, 122, 255, 0.1);
             color: var(--ios-blue);
-            border-radius: 12px;
-            font-size: 12px;
+            border-radius: 8px;
+            font-size: 10px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .announcement-title {
-            font-size: 17px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--ios-text);
-            margin-bottom: 6px;
+            margin-bottom: 2px;
             line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -263,9 +254,9 @@
         }
 
         .announcement-desc {
-            font-size: 14px;
+            font-size: 11px;
             color: var(--ios-text-secondary);
-            line-height: 1.4;
+            line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -273,9 +264,9 @@
         }
 
         .card-date {
-            font-size: 12px;
+            font-size: 10px;
             color: var(--ios-gray);
-            margin-top: 10px;
+            margin-top: 4px;
         }
 
         /* iOS 风格卡片 */
@@ -717,6 +708,158 @@
             letter-spacing: 0.05em;
         }
 
+        .stat-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+
+        /* 统计详情弹窗 */
+        .stat-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .stat-modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease-out;
+        }
+
+        .stat-modal-overlay.active .stat-modal-content {
+            transform: scale(1);
+        }
+
+        .stat-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .stat-modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-modal-icon.blue {
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .stat-modal-icon.green {
+            background: rgba(52, 199, 89, 0.1);
+        }
+
+        .stat-modal-icon.gray {
+            background: rgba(142, 142, 147, 0.1);
+        }
+
+        .stat-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ios-text);
+        }
+
+        .stat-modal-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--ios-blue);
+        }
+
+        .stat-modal-list {
+            overflow-y: visible;
+        }
+
+        .stat-modal-item {
+            padding: 12px;
+            border-bottom: 0.5px solid var(--ios-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-modal-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-modal-item-label {
+            font-size: 14px;
+            color: var(--ios-text);
+        }
+
+        .stat-modal-item-value {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .stat-modal-close {
+            width: 100%;
+            height: 48px;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .stat-modal-close {
+            width: 100%;
+            height: 48px;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
         /* 日志系统 */
         .log-container {
             max-height: 400px;
@@ -898,6 +1041,7 @@
         }
 
         .media-upload {
+            display: block;
             border: 2px dashed var(--ios-border);
             border-radius: var(--radius-md);
             padding: 24px;
@@ -905,9 +1049,11 @@
             margin-top: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .media-upload:hover {
+        .media-upload:hover,
+        .media-upload:active {
             border-color: var(--ios-blue);
             background: rgba(0, 122, 255, 0.02);
         }
@@ -1026,6 +1172,9 @@
             padding: 28px;
             width: 90%;
             max-width: 340px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             transform: scale(0.9);
             transition: transform 0.3s;
@@ -1208,9 +1357,290 @@
             background: var(--ios-red);
             color: white;
         }
+
+        /* 公告详情页 */
+        .announcement-detail-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ios-bg);
+            z-index: 1500;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .announcement-detail-page .page-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid rgba(0,0,0,0.16);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1600;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .announcement-detail-page .page-nav-back {
+            position: absolute;
+            left: 16px;
+            color: var(--ios-blue);
+            font-size: 17px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .announcement-detail-page .page-nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ios-text);
+        }
+
+        .announcement-detail-content {
+            padding: 16px;
+            padding-top: 68px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 480px) {
+            .announcement-detail-content {
+                max-width: 430px;
+                padding: 20px;
+                padding-top: 72px;
+            }
+        }
+
+        .detail-media {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .detail-media img, .detail-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-media-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .detail-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ios-text);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .detail-date {
+            font-size: 14px;
+            color: var(--ios-gray);
+            margin-bottom: 16px;
+        }
+
+        .detail-body {
+            font-size: 16px;
+            color: var(--ios-text);
+            line-height: 1.8;
+            background: var(--ios-card);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .detail-body img {
+            max-width: 100%;
+            border-radius: var(--radius-sm);
+            margin: 12px 0;
+        }
+
+        .detail-body a {
+            color: var(--ios-blue);
+            text-decoration: none;
+        }
+
+        /* 公告列表页 */
+        .announcement-list-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ios-bg);
+            z-index: 1400;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .announcement-list-page .page-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid rgba(0,0,0,0.16);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1500;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .announcement-list-page .page-nav-back {
+            position: absolute;
+            left: 16px;
+            color: var(--ios-blue);
+            font-size: 17px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .announcement-list-page .page-nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ios-text);
+        }
+
+        .announcement-list-content {
+            padding: 16px;
+            padding-top: 68px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 480px) {
+            .announcement-list-content {
+                max-width: 430px;
+                padding: 20px;
+                padding-top: 72px;
+            }
+        }
+
+        .list-card-item {
+            background: var(--ios-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 12px;
+            display: flex;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .list-card-item:active {
+            transform: scale(0.98);
+        }
+
+        .list-card-media {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .list-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .list-card-content {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .list-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ios-text);
+            margin-bottom: 4px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .list-card-date {
+            font-size: 12px;
+            color: var(--ios-gray);
+        }
     </style>
 </head>
 <body>
+
+    <!-- 公告详情页 -->
+    <div class="announcement-detail-page" id="announcementDetailPage">
+        <div class="page-nav">
+            <button class="page-nav-back" onclick="closeAnnouncementDetail()">
+                <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style="margin-top: 1px;">
+                    <path d="M10.5 18L2.5 10L10.5 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                返回
+            </button>
+            <div class="page-nav-title">公告详情</div>
+        </div>
+        <div class="announcement-detail-content" id="announcementDetailContent">
+            <!-- 动态内容 -->
+        </div>
+    </div>
+
+    <!-- 公告列表页 -->
+    <div class="announcement-list-page" id="announcementListPage">
+        <div class="page-nav">
+            <button class="page-nav-back" onclick="closeAnnouncementList()">
+                <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style="margin-top: 1px;">
+                    <path d="M10.5 18L2.5 10L10.5 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                返回
+            </button>
+            <div class="page-nav-title">全部公告</div>
+        </div>
+        <div class="announcement-list-content" id="announcementListContent">
+            <!-- 动态内容 -->
+        </div>
+    </div>
 
     <!-- 人机验证层 -->
     <div class="captcha-layer" id="captchaLayer">
@@ -1229,6 +1659,23 @@
         </div>
     </div>
 
+    <!-- 统计详情弹窗 -->
+    <div class="stat-modal-overlay" id="statModal">
+        <div class="stat-modal-content">
+            <div class="stat-modal-header">
+                <div class="stat-modal-icon blue" id="statModalIcon">📊</div>
+                <div>
+                    <div class="stat-modal-title" id="statModalTitle">统计详情</div>
+                    <div class="stat-modal-number" id="statModalNumber">0</div>
+                </div>
+            </div>
+            <div class="stat-modal-list" id="statModalList">
+                <!-- 动态内容 -->
+            </div>
+            <button class="stat-modal-close" onclick="closeStatModal()">关闭</button>
+        </div>
+    </div>
+
     <!-- 导航栏 -->
     <nav class="nav-header">
         <a class="nav-back" id="backBtn" style="display: none;" onclick="showUserPanel()">
@@ -1242,20 +1689,6 @@
 
     <!-- 用户激活面板 -->
     <div class="container" id="userPanel">
-        <!-- 公告区域 -->
-        <div class="announcement-section" id="announcementSection" style="display: none;">
-            <div class="section-header">
-                <div class="section-title">最新公告</div>
-                <div class="section-more" onclick="scrollToAnnouncements()">查看全部</div>
-            </div>
-            <div class="cards-container" id="announcementCards">
-                <!-- 动态生成公告卡片 -->
-            </div>
-            <div class="page-indicator" id="pageIndicator">
-                <!-- 动态生成指示器 -->
-            </div>
-        </div>
-
         <div class="hero">
             <div class="hero-icon">🔐</div>
             <h1 class="hero-title">设备激活</h1>
@@ -1292,6 +1725,17 @@
                 <!-- 动态结果 -->
             </div>
         </div>
+
+        <!-- 公告区域 - 四宫格 -->
+        <div class="announcement-section" id="announcementSection" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">最新公告</div>
+                <div class="section-more" onclick="showAllAnnouncements()">查看全部</div>
+            </div>
+            <div class="cards-grid" id="announcementCards">
+                <!-- 动态生成公告卡片 -->
+            </div>
+        </div>
     </div>
 
     <!-- 管理员面板 -->
@@ -1313,19 +1757,19 @@
         <!-- 概览页 -->
         <div id="tab-overview" class="tab-content">
             <div class="admin-stats">
-                <div class="stat-card">
+                <div class="stat-card" onclick="showStatDetail('total')">
                     <div class="stat-number" id="statTotal">0</div>
                     <div class="stat-label">总库存</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showStatDetail('used')">
                     <div class="stat-number" id="statUsed">0</div>
                     <div class="stat-label">已使用</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showStatDetail('available')">
                     <div class="stat-number" id="statAvailable">0</div>
                     <div class="stat-label">可用</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showStatDetail('rate')">
                     <div class="stat-number" id="statRate">0%</div>
                     <div class="stat-label">使用率</div>
                 </div>
@@ -1408,11 +1852,11 @@
                     
                     <div class="editor-content" id="announceContent" contenteditable="true" placeholder="请输入公告内容..."></div>
                     
-                    <div class="media-upload" onclick="document.getElementById('mediaFile').click()">
+                    <label for="mediaFile" class="media-upload">
                         <div style="font-size: 32px; margin-bottom: 8px;">📎</div>
                         <div style="font-size: 15px; color: var(--ios-text-secondary);">点击上传图片或视频</div>
                         <div style="font-size: 12px; color: var(--ios-gray); margin-top: 4px;">支持 JPG、PNG、MP4 格式</div>
-                    </div>
+                    </label>
                     <input type="file" id="mediaFile" style="display: none;" accept="image/*,video/*" onchange="handleMediaUpload(this)">
                     <div id="mediaPreview" style="margin-top: 12px; display: none;"></div>
                     
@@ -1470,15 +1914,15 @@
     </div>
 
     <script>
-        // 系统配置
-        let ADMIN_USERNAME = 'admin';
-        let ADMIN_PASSWORD = 'admin123';
+        // 系统配置 - 从localStorage读取
+        let ADMIN_USERNAME = localStorage.getItem('admin_username') || 'admin';
+        let ADMIN_PASSWORD = localStorage.getItem('admin_password') || 'admin123';
         
-        // 数据存储
-        let verificationCodes = {};
-        let activationRecords = [];
-        let securityLogs = [];
-        let announcements = [];
+        // 数据存储 - 从localStorage读取
+        let verificationCodes = JSON.parse(localStorage.getItem('verification_codes')) || {};
+        let activationRecords = JSON.parse(localStorage.getItem('activation_records')) || [];
+        let securityLogs = JSON.parse(localStorage.getItem('security_logs')) || [];
+        let announcements = JSON.parse(localStorage.getItem('announcements')) || [];
         
         // 当前验证码（人机验证用）
         let currentCaptcha = '';
@@ -1494,21 +1938,35 @@
             location: '未知'
         };
 
+        // 保存数据到localStorage
+        function saveData() {
+            localStorage.setItem('verification_codes', JSON.stringify(verificationCodes));
+            localStorage.setItem('activation_records', JSON.stringify(activationRecords));
+            localStorage.setItem('security_logs', JSON.stringify(securityLogs));
+            localStorage.setItem('announcements', JSON.stringify(announcements));
+            localStorage.setItem('admin_username', ADMIN_USERNAME);
+            localStorage.setItem('admin_password', ADMIN_PASSWORD);
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             initData();
             loadAnnouncements();
             getUserInfo();
             document.getElementById('systemUpdateTime').textContent = new Date().toLocaleString('zh-CN');
+            document.getElementById('currentUsername').textContent = ADMIN_USERNAME;
         });
 
         // 初始化数据
         function initData() {
-            // 添加示例验证码
-            const sampleCodes = ['ASDFGHJKL', 'QWERTYUIOP', 'ZXCVBNMLKJ', 'POIUYTREWQ', 'LKJHGFDSAA'];
-            sampleCodes.forEach(code => {
-                verificationCodes[code] = { used: false, usedBy: null, usedAt: null };
-            });
+            // 如果没有数据，添加示例验证码
+            if (Object.keys(verificationCodes).length === 0) {
+                const sampleCodes = ['ASDFGHJKL', 'QWERTYUIOP', 'ZXCVBNMLKJ', 'POIUYTREWQ', 'LKJHGFDSAA'];
+                sampleCodes.forEach(code => {
+                    verificationCodes[code] = { used: false, usedBy: null, usedAt: null };
+                });
+                saveData();
+            }
         }
 
         // 获取用户信息
@@ -1763,6 +2221,9 @@
                 // 添加记录
                 addRecord(verifyCode, deviceCode, true, '激活成功', recordId, activationCode);
                 
+                // 保存数据
+                saveData();
+                
                 showResult('success', '激活成功', activationCode);
                 resetBtn();
                 logBehavior('正常', '激活成功', 'safe');
@@ -1785,6 +2246,7 @@
             if (activationRecords.length > 100) {
                 activationRecords = activationRecords.slice(0, 100);
             }
+            saveData();
         }
 
         // 记录行为日志
@@ -1804,6 +2266,7 @@
                 securityLogs = securityLogs.slice(0, 200);
             }
             
+            saveData();
             updateTodayStats();
         }
 
@@ -1996,6 +2459,9 @@
             textarea.value = '';
             updateStats();
             
+            // 保存数据
+            saveData();
+            
             const msg = [];
             if (added > 0) msg.push(`成功添加 ${added} 个`);
             if (skipped > 0) msg.push(`跳过重复 ${skipped} 个`);
@@ -2063,6 +2529,9 @@
             
             announcements.unshift(announcement);
             
+            // 保存数据
+            saveData();
+            
             // 清空表单
             document.getElementById('announceTitle').value = '';
             document.getElementById('announceContent').innerHTML = '';
@@ -2104,6 +2573,7 @@
         function deleteAnnouncement(index) {
             if (confirm('确定要删除这条公告吗？')) {
                 announcements.splice(index, 1);
+                saveData();
                 refreshAnnouncementList();
                 loadAnnouncements();
                 showAlert('success', '删除成功', '公告已删除');
@@ -2113,7 +2583,6 @@
         function loadAnnouncements() {
             const section = document.getElementById('announcementSection');
             const container = document.getElementById('announcementCards');
-            const indicator = document.getElementById('pageIndicator');
             
             if (announcements.length === 0) {
                 section.style.display = 'none';
@@ -2122,8 +2591,9 @@
             
             section.style.display = 'block';
             
-            container.innerHTML = announcements.slice(0, 5).map((ann, index) => `
-                <div class="announcement-card">
+            // 四宫格显示，最多4个
+            container.innerHTML = announcements.slice(0, 4).map((ann, index) => `
+                <div class="announcement-card" onclick="showAnnouncementDetail(${index})">
                     <div class="card-media">
                         ${ann.media ? 
                             (ann.media.type === 'video' ? 
@@ -2134,32 +2604,88 @@
                     <div class="card-content">
                         <span class="card-badge">公告</span>
                         <div class="announcement-title">${ann.title}</div>
-                        <div class="announcement-desc">${ann.content.replace(/<[^>]*>/g, '').substring(0, 50)}${ann.content.length > 50 ? '...' : ''}</div>
-                        <div class="card-date">${new Date(ann.time).toLocaleString('zh-CN')}</div>
+                        <div class="announcement-desc">${ann.content.replace(/<[^>]*>/g, '').substring(0, 30)}${ann.content.length > 30 ? '...' : ''}</div>
+                        <div class="card-date">${new Date(ann.time).toLocaleDateString('zh-CN')}</div>
                     </div>
                 </div>
             `).join('');
-            
-            // 生成指示器
-            const count = Math.min(announcements.length, 5);
-            indicator.innerHTML = Array(count).fill(0).map((_, i) => 
-                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
-            ).join('');
-            
-            // 监听滚动更新指示器
-            container.addEventListener('scroll', () => {
-                const scrollLeft = container.scrollLeft;
-                const cardWidth = container.querySelector('.announcement-card')?.offsetWidth + 12 || 332;
-                const activeIndex = Math.round(scrollLeft / cardWidth);
-                
-                indicator.querySelectorAll('.dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i === activeIndex);
-                });
-            });
         }
 
-        function scrollToAnnouncements() {
-            document.getElementById('announcementSection').scrollIntoView({ behavior: 'smooth' });
+        // 显示公告详情页
+        function showAnnouncementDetail(index) {
+            const ann = announcements[index];
+            if (!ann) return;
+            
+            const page = document.getElementById('announcementDetailPage');
+            const content = document.getElementById('announcementDetailContent');
+            
+            content.innerHTML = `
+                <div class="detail-media">
+                    ${ann.media ? 
+                        (ann.media.type === 'video' ? 
+                            `<video src="${ann.media.url}" controls></video>` : 
+                            `<img src="${ann.media.url}" alt="">`) : 
+                        '<div class="detail-media-placeholder">📢</div>'}
+                </div>
+                <div class="detail-title">${ann.title}</div>
+                <div class="detail-date">${new Date(ann.time).toLocaleString('zh-CN')}</div>
+                <div class="detail-body">${ann.content || '暂无内容'}</div>
+            `;
+            
+            page.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭公告详情页
+        function closeAnnouncementDetail() {
+            const page = document.getElementById('announcementDetailPage');
+            page.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 显示全部公告列表页
+        function showAllAnnouncements() {
+            const page = document.getElementById('announcementListPage');
+            const content = document.getElementById('announcementListContent');
+            
+            if (announcements.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📢</div>
+                        <div>暂无公告</div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = announcements.map((ann, index) => `
+                    <div class="list-card-item" onclick="showAnnouncementDetailFromList(${index})">
+                        <div class="list-card-media">
+                            ${ann.media && ann.media.type === 'image' ? 
+                                `<img src="${ann.media.url}" alt="">` : 
+                                '<div style="font-size: 32px;">📢</div>'}
+                        </div>
+                        <div class="list-card-content">
+                            <div class="list-card-title">${ann.title}</div>
+                            <div class="list-card-date">${new Date(ann.time).toLocaleDateString('zh-CN')}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            page.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭公告列表页
+        function closeAnnouncementList() {
+            const page = document.getElementById('announcementListPage');
+            page.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 从列表页打开详情
+        function showAnnouncementDetailFromList(index) {
+            closeAnnouncementList();
+            setTimeout(() => showAnnouncementDetail(index), 100);
         }
 
         // 提示框
@@ -2198,6 +2724,7 @@
             const newPass = prompt('请输入新密码：');
             if (newPass && newPass.length >= 6) {
                 ADMIN_PASSWORD = newPass;
+                saveData();
                 showAlert('success', '修改成功', '管理员密码已更新');
             } else if (newPass) {
                 showAlert('error', '修改失败', '密码长度至少6位');
@@ -2209,11 +2736,126 @@
             if (newName && newName.length >= 3) {
                 ADMIN_USERNAME = newName;
                 document.getElementById('currentUsername').textContent = newName;
+                saveData();
                 showAlert('success', '修改成功', '管理员用户名已更新');
             } else if (newName) {
                 showAlert('error', '修改失败', '用户名长度至少3位');
             }
         }
+
+        // 统计详情弹窗
+        function showStatDetail(type) {
+            const modal = document.getElementById('statModal');
+            const icon = document.getElementById('statModalIcon');
+            const title = document.getElementById('statModalTitle');
+            const number = document.getElementById('statModalNumber');
+            const list = document.getElementById('statModalList');
+            
+            let codes = [];
+            let modalTitle = '';
+            let modalNumber = '';
+            
+            switch(type) {
+                case 'total':
+                    modalTitle = '总库存';
+                    modalNumber = Object.keys(verificationCodes).length;
+                    icon.textContent = '📦';
+                    icon.className = 'stat-modal-icon blue';
+                    codes = Object.entries(verificationCodes).map(([code, info]) => ({
+                        code,
+                        status: info.used ? '已使用' : '未使用',
+                        used: info.used
+                    }));
+                    break;
+                case 'used':
+                    modalTitle = '已使用';
+                    modalNumber = Object.values(verificationCodes).filter(v => v.used).length;
+                    icon.textContent = '✓';
+                    icon.className = 'stat-modal-icon green';
+                    codes = Object.entries(verificationCodes)
+                        .filter(([_, info]) => info.used)
+                        .map(([code, info]) => ({
+                            code,
+                            status: info.usedAt || '已使用',
+                            device: info.usedBy || '-'
+                        }));
+                    break;
+                case 'available':
+                    modalTitle = '可用';
+                    modalNumber = Object.values(verificationCodes).filter(v => !v.used).length;
+                    icon.textContent = '🔓';
+                    icon.className = 'stat-modal-icon blue';
+                    codes = Object.entries(verificationCodes)
+                        .filter(([_, info]) => !info.used)
+                        .map(([code, _]) => ({
+                            code,
+                            status: '可用'
+                        }));
+                    break;
+                case 'rate':
+                    const total = Object.keys(verificationCodes).length;
+                    const used = Object.values(verificationCodes).filter(v => v.used).length;
+                    const rate = total > 0 ? Math.round((used / total) * 100) : 0;
+                    modalTitle = '使用率';
+                    modalNumber = rate + '%';
+                    icon.textContent = '📈';
+                    icon.className = 'stat-modal-icon blue';
+                    codes = [
+                        { label: '总验证码数', value: total },
+                        { label: '已使用', value: used },
+                        { label: '未使用', value: total - used },
+                        { label: '使用率', value: rate + '%' }
+                    ];
+                    break;
+            }
+            
+            title.textContent = modalTitle;
+            number.textContent = modalNumber;
+            
+            // 生成列表内容
+            if (type === 'rate') {
+                list.innerHTML = codes.map(item => `
+                    <div class="stat-modal-item">
+                        <span class="stat-modal-item-label">${item.label}</span>
+                        <span class="stat-modal-item-value">${item.value}</span>
+                    </div>
+                `).join('');
+            } else if (codes.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state" style="padding: 40px 20px;">
+                        <div class="empty-icon">📭</div>
+                        <div>暂无数据</div>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = codes.slice(0, 20).map(item => `
+                    <div class="stat-modal-item">
+                        <span class="stat-modal-item-label">${item.code}</span>
+                        <span class="stat-modal-item-value">${item.status}</span>
+                    </div>
+                `).join('');
+                if (codes.length > 20) {
+                    list.innerHTML += `
+                        <div class="stat-modal-item" style="justify-content: center;">
+                            <span class="stat-modal-item-value">还有 ${codes.length - 20} 条...</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeStatModal() {
+            document.getElementById('statModal').classList.remove('active');
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('statModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeStatModal();
+            }
+        });
     </script>
 </body>
 </html>
