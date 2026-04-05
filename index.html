@@ -91,7 +91,7 @@
             opacity: 0.6;
         }
 
-        /* 主容器 - 优化手机比例 */
+        /* 主容器 */
         .container {
             max-width: 100%;
             margin: 0 auto;
@@ -146,7 +146,7 @@
             padding: 0 20px;
         }
 
-        /* 公告卡片轮播 - 苹果风格 */
+        /* 公告卡片轮播 */
         .announcement-section {
             margin-bottom: 20px;
             opacity: 0;
@@ -1148,6 +1148,66 @@
             border-color: var(--ios-blue);
             background: white;
         }
+
+        /* 公告列表项 */
+        .announcement-list-item {
+            padding: 16px;
+            border-bottom: 0.5px solid var(--ios-border);
+            background: var(--ios-card);
+        }
+
+        .announcement-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .announcement-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .announcement-list-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ios-text);
+        }
+
+        .announcement-list-date {
+            font-size: 12px;
+            color: var(--ios-gray);
+        }
+
+        .announcement-list-content {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .announcement-list-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--ios-red);
+        }
+
+        .btn-danger:hover {
+            background: var(--ios-red);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -1453,7 +1513,6 @@
 
         // 获取用户信息
         function getUserInfo() {
-            // 模拟获取IP和设备信息
             userBehavior.ip = generateRandomIP();
             userBehavior.device = navigator.userAgent.match(/\((.*?)\)/)?.[1] || '未知设备';
             userBehavior.location = '未知位置';
@@ -2029,4 +2088,132 @@
             }
             
             list.innerHTML = announcements.map((ann, index) => `
+                <div class="announcement-list-item">
+                    <div class="announcement-list-header">
+                        <span class="announcement-list-title">${ann.title}</span>
+                        <span class="announcement-list-date">${new Date(ann.time).toLocaleString('zh-CN')}</span>
+                    </div>
+                    <div class="announcement-list-content">${ann.content || '无内容'}</div>
+                    <div class="announcement-list-actions">
+                        <button class="btn-small btn-danger" onclick="deleteAnnouncement(${index})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteAnnouncement(index) {
+            if (confirm('确定要删除这条公告吗？')) {
+                announcements.splice(index, 1);
+                refreshAnnouncementList();
+                loadAnnouncements();
+                showAlert('success', '删除成功', '公告已删除');
+            }
+        }
+
+        function loadAnnouncements() {
+            const section = document.getElementById('announcementSection');
+            const container = document.getElementById('announcementCards');
+            const indicator = document.getElementById('pageIndicator');
+            
+            if (announcements.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            
+            container.innerHTML = announcements.slice(0, 5).map((ann, index) => `
+                <div class="announcement-card">
+                    <div class="card-media">
+                        ${ann.media ? 
+                            (ann.media.type === 'video' ? 
+                                `<video src="${ann.media.url}" controls></video>` : 
+                                `<img src="${ann.media.url}" alt="">`) : 
+                            '<div class="card-media-placeholder">📢</div>'}
+                    </div>
+                    <div class="card-content">
+                        <span class="card-badge">公告</span>
+                        <div class="announcement-title">${ann.title}</div>
+                        <div class="announcement-desc">${ann.content.replace(/<[^>]*>/g, '').substring(0, 50)}${ann.content.length > 50 ? '...' : ''}</div>
+                        <div class="card-date">${new Date(ann.time).toLocaleString('zh-CN')}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 生成指示器
+            const count = Math.min(announcements.length, 5);
+            indicator.innerHTML = Array(count).fill(0).map((_, i) => 
+                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
+            ).join('');
+            
+            // 监听滚动更新指示器
+            container.addEventListener('scroll', () => {
+                const scrollLeft = container.scrollLeft;
+                const cardWidth = container.querySelector('.announcement-card')?.offsetWidth + 12 || 332;
+                const activeIndex = Math.round(scrollLeft / cardWidth);
                 
+                indicator.querySelectorAll('.dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        }
+
+        function scrollToAnnouncements() {
+            document.getElementById('announcementSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 提示框
+        function showAlert(type, title, text) {
+            const modal = document.getElementById('alertModal');
+            const icon = document.getElementById('alertIcon');
+            const titleEl = document.getElementById('alertTitle');
+            const textEl = document.getElementById('alertText');
+            
+            if (type === 'success') {
+                icon.style.background = 'var(--ios-green)';
+                icon.style.color = 'white';
+                icon.textContent = '✓';
+            } else if (type === 'error') {
+                icon.style.background = 'var(--ios-red)';
+                icon.style.color = 'white';
+                icon.textContent = '✕';
+            } else {
+                icon.style.background = 'var(--ios-blue)';
+                icon.style.color = 'white';
+                icon.textContent = '!';
+            }
+            
+            titleEl.textContent = title;
+            textEl.textContent = text;
+            
+            modal.classList.add('active');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertModal').classList.remove('active');
+        }
+
+        // 设置功能
+        function showChangePassword() {
+            const newPass = prompt('请输入新密码：');
+            if (newPass && newPass.length >= 6) {
+                ADMIN_PASSWORD = newPass;
+                showAlert('success', '修改成功', '管理员密码已更新');
+            } else if (newPass) {
+                showAlert('error', '修改失败', '密码长度至少6位');
+            }
+        }
+
+        function showChangeUsername() {
+            const newName = prompt('请输入新用户名：');
+            if (newName && newName.length >= 3) {
+                ADMIN_USERNAME = newName;
+                document.getElementById('currentUsername').textContent = newName;
+                showAlert('success', '修改成功', '管理员用户名已更新');
+            } else if (newName) {
+                showAlert('error', '修改失败', '用户名长度至少3位');
+            }
+        }
+    </script>
+</body>
+</html>
